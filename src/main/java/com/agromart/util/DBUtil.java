@@ -8,13 +8,13 @@ import java.sql.SQLException;
 
 
 public class DBUtil {
-	private final String URL="jdbc:mysql://localhost:3306/agromart";
-	private final String USERNAME="root";
-	private final String PASSWORD="root@123";
-	private final String DRIVER="com.mysql.cj.jdbc.Driver";
+	private final static String URL="jdbc:mysql://localhost:3306/agromart";
+	private final static String USERNAME="root";
+	private final static  String PASSWORD="root@123";
+	private final static String DRIVER="com.mysql.cj.jdbc.Driver";
 
 
-	public Connection getConnection() throws ClassNotFoundException, SQLException {
+	public static Connection getConnection() throws ClassNotFoundException, SQLException {
 		Class.forName(DRIVER);
 		Connection con =DriverManager.getConnection(URL, USERNAME, PASSWORD);
 		System.out.println("//\\Namastey Padharo Saa...");
@@ -47,9 +47,10 @@ public class DBUtil {
 	close(con, null, rs);
 	}
 	public static void main(String[] args) {
-		DBUtil dbutil =new DBUtil();
+		//DBUtil dbutil =new DBUtil();
 		try {
-			dbutil.getConnection();
+			getConnection();
+			//dbutil.getConnection();
 		}catch (ClassNotFoundException e) {
 		e.printStackTrace();
 		}catch (SQLException e) {
