@@ -1,0 +1,1 @@
+<a href="<%= request.getContextPath() %>/logout">Logout</a>
