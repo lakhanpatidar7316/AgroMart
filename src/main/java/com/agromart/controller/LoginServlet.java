@@ -35,6 +35,7 @@ public class LoginServlet extends HttpServlet {
 	                HttpSession session = req.getSession();
 	                session.setAttribute("user", user);
 	                session.setAttribute("sessionId", session.getId());
+	                session.setAttribute("role", user.getUserRoleId());
 
 	                // login_activity
 	                String sql1 = "INSERT INTO login_activity(user_id, status) VALUES (?, ?)";
