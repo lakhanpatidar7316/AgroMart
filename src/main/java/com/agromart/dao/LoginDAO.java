@@ -20,6 +20,7 @@ public class LoginDAO {
 
 			ps.setString(1, email);
 			ps.setString(2, password);
+			
 
 			ResultSet rs = ps.executeQuery();
 
@@ -27,6 +28,7 @@ public class LoginDAO {
 				user = new User();
 				user.setId(rs.getInt("id"));
 				user.setEmail(rs.getString("email"));
+				user.setUserRoleId(rs.getInt("user_role_id"));
 			}
 
 		} catch (Exception e) {
