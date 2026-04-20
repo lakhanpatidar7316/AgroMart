@@ -3,7 +3,6 @@
 <body>
 
 <h2>Login</h2>
-<p>Role: <%= session.getAttribute("role") %></p>
 
 <form action="<%= request.getContextPath() %>/login" method="post">
     Email: <input type="email" name="email" required><br><br>

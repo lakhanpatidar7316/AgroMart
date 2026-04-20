@@ -9,32 +9,32 @@ import com.agromart.util.DBUtil;
 
 public class LoginDAO {
 
-	public User validateUser(String email, String password) {
-		User user = null;
+    public User validateUser(String email, String password) {
 
-		try {
-			Connection con = DBUtil.getConnection();
+        User user = null;
 
-			String sql = "SELECT * FROM user WHERE email=? AND password=? AND is_active=1";
-			PreparedStatement ps = con.prepareStatement(sql);
+        String sql = "SELECT * FROM user WHERE email=? AND password=?";
 
-			ps.setString(1, email);
-			ps.setString(2, password);
-			
+        try (Connection con = DBUtil.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-			ResultSet rs = ps.executeQuery();
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-			if (rs.next()) {
-				user = new User();
-				user.setId(rs.getInt("id"));
-				user.setEmail(rs.getString("email"));
-				user.setUserRoleId(rs.getInt("user_role_id"));
-			}
+            ResultSet rs = ps.executeQuery();
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+            if (rs.next()) {
+                user = new User();
 
-		return user;
-	}
+                user.setId(rs.getInt("id"));                    // ✅ IMPORTANT
+                user.setEmail(rs.getString("email"));
+                user.setUserRoleId(rs.getInt("user_role_id"));  // ✅ IMPORTANT
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
 }

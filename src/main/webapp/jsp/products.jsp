@@ -1,41 +1,56 @@
 <%@ page import="java.util.*, com.agromart.model.Product" %>
 
-<h2>Product List</h2>
+<h2 style="text-align:center;">Products</h2>
 
 <%
 List<Product> list = (List<Product>) request.getAttribute("products");
 %>
 
-<!-- 🔍 DEBUG -->
-<p>List Size: <%= list == null ? "null" : list.size() %></p>
+<div style="display:flex; flex-wrap:wrap; justify-content:center;">
 
-<div style="display:flex; flex-wrap:wrap;">
+<% if(list != null && !list.isEmpty()) {
+   for(Product p : list) { %>
 
-<% if(list != null && !list.isEmpty()) { %>
+<div style="
+    border:1px solid #ddd;
+    border-radius:10px;
+    margin:15px;
+    padding:15px;
+    width:220px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+">
 
-    <% for(Product p : list) { %>
+    <!-- PRODUCT IMAGE -->
+    <img src="<%= request.getContextPath() %>/<%= p.getImagePath() %>" 
+         width="180" height="150" style="border-radius:8px;"><br><br>
 
-    <div style="border:1px solid black; margin:10px; padding:10px; width:200px;">
+    <!-- NAME -->
+    <h3><%= p.getName() %></h3>
 
-        <img src="<%= request.getContextPath() %>/<%= p.getImagePath() %>" width="150"><br>
+    <!-- PRICE -->
+    <p style="color:green; font-size:18px;">₹ <%= p.getPrice() %></p>
 
-        <h3><%= p.getName() %></h3>
-        <p>₹ <%= p.getPrice() %></p>
+    <!-- ADD TO CART -->
+    <form action="<%= request.getContextPath() %>/addToCart" method="post">
+        <input type="hidden" name="productId" value="<%= p.getId() %>">
+        <input type="hidden" name="quantity" value="1">
+        <button style="
+            background:#2874f0;
+            color:white;
+            border:none;
+            padding:8px 15px;
+            border-radius:5px;
+            cursor:pointer;
+        ">Add to Cart</button>
+    </form>
 
-        <!-- ✅ FORM MUST BE INSIDE LOOP -->
-        <form action="<%= request.getContextPath() %>/addToCart" method="post">
-            <input type="hidden" name="productId" value="<%= p.getId() %>">
-            <input type="number" name="quantity" value="1">
-            <button type="submit">Add to Cart</button>
-        </form>
+</div>
 
-    </div>
+<% } 
+} else { %>
 
-    <% } %>
-
-<% } else { %>
-
-    <p>No products available ❌</p>
+<p>No products available ❌</p>
 
 <% } %>
 
