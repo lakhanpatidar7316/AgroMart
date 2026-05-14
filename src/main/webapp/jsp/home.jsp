@@ -1,5 +1,7 @@
 <a href="<%= request.getContextPath() %>/logout">Logout</a>
-
+<a href="<%= request.getContextPath() %>/adminProducts">
+    Admin Panel
+</a>
 <%
 Integer role = (Integer) session.getAttribute("role");
 %>
@@ -23,3 +25,4 @@ Integer role = (Integer) session.getAttribute("role");
 <% if(role != null && role == 1) { %>
     <a href="<%= request.getContextPath() %>/jsp/admin.jsp">Admin Panel</a>
 <% } %>
+

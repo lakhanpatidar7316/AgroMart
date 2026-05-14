@@ -8,7 +8,21 @@ public class Product {
     private int categoryId;
     private double price;
     private String imagePath;
+    private String status;
+    private int sellerId;
 
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public int getId() {
 		return id;
 	}

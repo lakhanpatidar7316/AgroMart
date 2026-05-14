@@ -8,21 +8,49 @@ import com.agromart.model.Product;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
 @WebServlet("/products")
-	public class ViewProductServlet extends HttpServlet {
+public class ViewProductServlet extends HttpServlet {
 
-	    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-	            throws ServletException, IOException {
+    private static final long serialVersionUID = 1L;
 
-	        ProductDAO dao = new ProductDAO();
-	        List<Product> list = dao.getAllProducts();
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
 
-	        req.setAttribute("products", list);
-	        req.getRequestDispatcher("jsp/products.jsp").forward(req, res);
-	    }
-	}
+        String keyword = req.getParameter("keyword");
+        String categoryStr = req.getParameter("categoryId");
 
+        ProductDAO dao = new ProductDAO();
+
+        List<Product> list;
+
+        // ✅ SEARCH
+        if(keyword != null && !keyword.trim().isEmpty()) {
+
+            list = dao.searchProducts(keyword);
+
+        }
+
+        // ✅ FILTER
+        else if(categoryStr != null && !categoryStr.isEmpty()) {
+
+            int categoryId = Integer.parseInt(categoryStr);
+
+            list = dao.getProductsByCategory(categoryId);
+
+        }
+
+        // ✅ ALL PRODUCTS
+        else {
+
+            list = dao.getAllProducts();
+        }
+
+        // ✅ IMPORTANT
+        req.setAttribute("products", list);
+
+        req.getRequestDispatcher("jsp/products.jsp")
+           .forward(req, res);
+    }
+}

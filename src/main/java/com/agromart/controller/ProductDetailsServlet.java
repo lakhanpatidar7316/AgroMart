@@ -7,12 +7,10 @@ import com.agromart.model.Product;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
-@WebServlet("/editProduct")
-public class EditProductServlet extends HttpServlet {
+@WebServlet("/productDetails")
+public class ProductDetailsServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -20,9 +18,12 @@ public class EditProductServlet extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
 
         ProductDAO dao = new ProductDAO();
-        Product p = dao.getProductById(id); // we create this
+
+        Product p = dao.getProductById(id);
 
         req.setAttribute("product", p);
-        req.getRequestDispatcher("jsp/editProduct.jsp").forward(req, res);
+
+        req.getRequestDispatcher("jsp/productDetails.jsp")
+           .forward(req, res);
     }
 }

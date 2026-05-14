@@ -14,7 +14,7 @@ public class ProductDAO {
 
 		boolean status = false;
 
-		String sql = "INSERT INTO product(name, description, category_id, price) VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO product(name, description, category_id, price, seller_id, status) VALUES (?, ?, ?, ?, ?, ?)";
 
 		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -22,6 +22,9 @@ public class ProductDAO {
 			ps.setString(2, product.getDescription());
 			ps.setInt(3, product.getCategoryId());
 			ps.setDouble(4, product.getPrice());
+
+			ps.setInt(5, product.getSellerId());
+			ps.setString(6, "PENDING");
 
 			int row = ps.executeUpdate();
 
@@ -35,128 +38,259 @@ public class ProductDAO {
 
 		return status;
 	}
+
 	public List<Product> getAllProducts() {
 
-	    List<Product> list = new ArrayList<>();
+		List<Product> list = new ArrayList<>();
 
-	    String sql = "SELECT p.*, pi.image_url FROM product p " +
-	             "LEFT JOIN product_images pi ON p.id = pi.product_id";
+		String sql = "SELECT p.*, pi.image_url " + "FROM product p "
+				+ "LEFT JOIN product_images pi ON p.id = pi.product_id " + "WHERE p.status='APPROVED'";
 
-	    try (Connection con = DBUtil.getConnection();
-	         PreparedStatement ps = con.prepareStatement(sql);
-	         ResultSet rs = ps.executeQuery()) {
+		try (Connection con = DBUtil.getConnection();
+				PreparedStatement ps = con.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
 
-	        while (rs.next()) {
-	            Product p = new Product();
+			while (rs.next()) {
 
-	            p.setId(rs.getInt("id"));
-	            p.setName(rs.getString("name"));
-	            p.setDescription(rs.getString("description"));
-	            p.setPrice(rs.getDouble("price"));
+				Product p = new Product();
 
-	            p.setImagePath(rs.getString("image_url")); // add this in model
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setImagePath(rs.getString("image_url"));
+				p.setStatus(rs.getString("status"));
 
-	            list.add(p);
-	        }
+				list.add(p);
+			}
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return list;
+		return list;
 	}
+
 	public List<Product> getProductsBySeller(int sellerId) {
 
-	    List<Product> list = new ArrayList<>();
+		List<Product> list = new ArrayList<>();
 
-	    String sql = "SELECT * FROM product WHERE seller_id=?";
+		String sql = "SELECT * FROM product WHERE seller_id=?";
 
-	    try (Connection con = DBUtil.getConnection();
-	         PreparedStatement ps = con.prepareStatement(sql)) {
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-	        ps.setInt(1, sellerId);
+			ps.setInt(1, sellerId);
 
-	        ResultSet rs = ps.executeQuery();
+			ResultSet rs = ps.executeQuery();
 
-	        while (rs.next()) {
-	            Product p = new Product();
+			while (rs.next()) {
 
-	            p.setId(rs.getInt("id"));
-	            p.setName(rs.getString("name"));
-	            p.setDescription(rs.getString("description"));
-	            p.setPrice(rs.getDouble("price"));
+				Product p = new Product();
 
-	            list.add(p);
-	        }
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setStatus(rs.getString("status"));
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+				list.add(p);
+			}
 
-	    return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
 	}
+
 	public void deleteProduct(int productId) {
 
-	    try (Connection con = DBUtil.getConnection()) {
+		try (Connection con = DBUtil.getConnection()) {
 
-	        // delete image first (optional but safe)
-	        String sql1 = "DELETE FROM product_images WHERE product_id=?";
-	        PreparedStatement ps1 = con.prepareStatement(sql1);
-	        ps1.setInt(1, productId);
-	        ps1.executeUpdate();
+			// delete images first
+			String sql1 = "DELETE FROM product_images WHERE product_id=?";
+			PreparedStatement ps1 = con.prepareStatement(sql1);
 
-	        // delete product
-	        String sql2 = "DELETE FROM product WHERE id=?";
-	        PreparedStatement ps2 = con.prepareStatement(sql2);
-	        ps2.setInt(1, productId);
-	        ps2.executeUpdate();
+			ps1.setInt(1, productId);
+			ps1.executeUpdate();
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+			// delete product
+			String sql2 = "DELETE FROM product WHERE id=?";
+			PreparedStatement ps2 = con.prepareStatement(sql2);
+
+			ps2.setInt(1, productId);
+			ps2.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
+
 	public Product getProductById(int id) {
 
-	    Product p = null;
+		Product p = null;
 
-	    try (Connection con = DBUtil.getConnection()) {
+		try (Connection con = DBUtil.getConnection()) {
 
-	        String sql = "SELECT * FROM product WHERE id=?";
-	        PreparedStatement ps = con.prepareStatement(sql);
-	        ps.setInt(1, id);
+			String sql = "SELECT p.*, pi.image_url " + "FROM product p "
+					+ "LEFT JOIN product_images pi ON p.id = pi.product_id " + "WHERE p.id=?";
+			PreparedStatement ps = con.prepareStatement(sql);
 
-	        ResultSet rs = ps.executeQuery();
+			ps.setInt(1, id);
 
-	        if (rs.next()) {
-	            p = new Product();
-	            p.setId(rs.getInt("id"));
-	            p.setName(rs.getString("name"));
-	            p.setDescription(rs.getString("description"));
-	            p.setPrice(rs.getDouble("price"));
-	        }
+			ResultSet rs = ps.executeQuery();
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+			if (rs.next()) {
 
-	    return p;
+				p = new Product();
+
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setStatus(rs.getString("status"));
+				p.setImagePath(rs.getString("image_url"));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return p;
 	}
+
 	public void updateProduct(int id, String name, String desc, double price) {
 
-	    try (Connection con = DBUtil.getConnection()) {
+		try (Connection con = DBUtil.getConnection()) {
 
-	        String sql = "UPDATE product SET name=?, description=?, price=? WHERE id=?";
-	        PreparedStatement ps = con.prepareStatement(sql);
+			String sql = "UPDATE product SET name=?, description=?, price=? WHERE id=?";
 
-	        ps.setString(1, name);
-	        ps.setString(2, desc);
-	        ps.setDouble(3, price);
-	        ps.setInt(4, id);
+			PreparedStatement ps = con.prepareStatement(sql);
 
-	        ps.executeUpdate();
+			ps.setString(1, name);
+			ps.setString(2, desc);
+			ps.setDouble(3, price);
+			ps.setInt(4, id);
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+			ps.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public List<Product> getPendingProducts() {
+
+		List<Product> list = new ArrayList<>();
+
+		String sql = "SELECT * FROM product WHERE status='PENDING'";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				Product p = new Product();
+
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setStatus(rs.getString("status"));
+
+				list.add(p);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public List<Product> getProductsByCategory(int categoryId) {
+
+		List<Product> list = new ArrayList<>();
+
+		String sql = "SELECT p.*, pi.image_url " + "FROM product p "
+				+ "LEFT JOIN product_images pi ON p.id = pi.product_id "
+				+ "WHERE p.status='APPROVED' AND p.category_id=?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, categoryId);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				Product p = new Product();
+
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setImagePath(rs.getString("image_url"));
+
+				list.add(p);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public List<Product> searchProducts(String keyword) {
+
+		List<Product> list = new ArrayList<>();
+
+		String sql = "SELECT p.*, pi.image_url " + "FROM product p "
+				+ "LEFT JOIN product_images pi ON p.id = pi.product_id "
+				+ "WHERE p.status='APPROVED' AND p.name LIKE ?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setString(1, "%" + keyword + "%");
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				Product p = new Product();
+
+				p.setId(rs.getInt("id"));
+				p.setName(rs.getString("name"));
+				p.setDescription(rs.getString("description"));
+				p.setPrice(rs.getDouble("price"));
+				p.setImagePath(rs.getString("image_url"));
+
+				list.add(p);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public void approveProduct(int id) {
+
+		try (Connection con = DBUtil.getConnection()) {
+
+			String sql = "UPDATE product SET status='APPROVED' WHERE id=?";
+
+			PreparedStatement ps = con.prepareStatement(sql);
+
+			ps.setInt(1, id);
+
+			ps.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
